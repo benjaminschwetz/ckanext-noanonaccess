@@ -31,6 +31,8 @@ class AuthMiddleware(object):
             return self.app(environ,start_response)
         elif '/uploads/' in environ['PATH_INFO'] or '/download/' in environ['PATH_INFO']:
             return self.app(environ,start_response)
+        elif environ['PATH_INFO'].startswith('/webassets/'):
+            return self.app(environ,start_response)
         elif (environ['PATH_INFO']).endswith('.rdf'):
             return self.app(environ,start_response)
         elif 'repoze.who.identity' in environ or self._get_user_for_apikey(environ):
