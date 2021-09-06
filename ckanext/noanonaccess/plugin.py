@@ -27,9 +27,10 @@ class AuthMiddleware(object):
         feeds_access = config.get('ckanext.noanonaccess.allow_feeds')
         # we putting only UI behind login so API paths should remain accessible
         # also, allow access to dataset download and uploaded files
-        if '/api/' in environ['PATH_INFO'] or '/datastore/dump/' in environ['PATH_INFO']:
-            return self.app(environ,start_response)
-        elif '/uploads/' in environ['PATH_INFO'] or '/download/' in environ['PATH_INFO']:
+        #if '/api/' in environ['PATH_INFO'] or '/datastore/dump/' in environ['PATH_INFO']:
+        #    return self.app(environ,start_response)
+        #elif '/uploads/' in environ['PATH_INFO'] or '/download/' in environ['PATH_INFO']:
+        if '/uploads/' in environ['PATH_INFO'] or '/download/' in environ['PATH_INFO']:
             return self.app(environ,start_response)
         elif environ['PATH_INFO'].startswith('/webassets/'):
             return self.app(environ,start_response)
