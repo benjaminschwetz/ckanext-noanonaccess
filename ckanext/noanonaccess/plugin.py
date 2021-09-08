@@ -91,7 +91,7 @@ class AuthMiddleware(object):
                 apikey = ''
         if not apikey:
             return None
-        apikey = unicode(apikey)
+        apikey = str(apikey)
         # check if API key is valid by comparing against keys of registered users
         query = model.Session.query(model.User)
         user = query.filter_by(apikey=apikey).first()
