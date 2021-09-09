@@ -4,6 +4,7 @@ import ckan.model as model
 import ckan.plugins as plugins
 from ckan.plugins.toolkit import config
 import ckan.lib.base as base
+import ckan.lib.api_token as ckan_token
 
 
 logger = logging.getLogger(__name__)
@@ -36,7 +37,7 @@ class AuthMiddleware(object):
             return self.app(environ,start_response)
         elif (environ['PATH_INFO']).endswith('.rdf'):
             return self.app(environ,start_response)
-        elif 'repoze.who.identity' in environ or self._get_user_for_apikey(environ):
+        elif 'repoze.who.identity' in environ or self._get_user_for_api_token(environ):
             # if logged in via browser cookies or API key, all pages accessible
             return self.app(environ,start_response)
         elif dcat_access and (environ['PATH_INFO'].endswith(tuple(ext))
@@ -76,25 +77,22 @@ class AuthMiddleware(object):
                 start_response(status, headers)
                 return ['']
 
-    def _get_user_for_apikey(self, environ):
+    def _get_user_for_api_token(self, environ):
         # Adapted from https://github.com/ckan/ckan/blob/625b51cdb0f1697add59c7e3faf723a48c8e04fd/ckan/lib/base.py#L396
-        apikey_header_name = config.get(base.APIKEY_HEADER_NAME_KEY,
+        api_token_header_name = config.get(base.APIKEY_HEADER_NAME_KEY,
                                         base.APIKEY_HEADER_NAME_DEFAULT)
-        apikey = environ.get(apikey_header_name, '')
-        if not apikey:
+        api_token = environ.get(api_token_header_name, '')
+        if not api_token:
             # For misunderstanding old documentation (now fixed).
-            apikey = environ.get('HTTP_AUTHORIZATION', '')
-        if not apikey:
-            apikey = environ.get('Authorization', '')
+            api_token = environ.get('HTTP_AUTHORIZATION', '')
+        if not api_token:
+            api_token = environ.get('Authorization', '')
             # Forget HTTP Auth credentials (they have spaces).
-            if ' ' in apikey:
-                apikey = ''
-        if not apikey:
+            if ' ' in api_token:
+                api_token = ''
+        if not api_token:
             return None
-        apikey = str(apikey)
-        # check if API key is valid by comparing against keys of registered users
-        query = model.Session.query(model.User)
-        user = query.filter_by(apikey=apikey).first()
+        user = ckan_token.get_user_from_token(api_token)
         return user
 
 
